@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>設定ページ</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      margin: 40px;
+      background: #f9f9f9;
+    }
+    .container {
+      background: #fff;
+      padding: 24px 32px;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      max-width: 400px;
+      margin: auto;
+    }
+    label {
+      font-size: 1.1em;
+      margin-bottom: 8px;
+      display: block;
+    }
+    input[type="password"], select {
+      width: 100%;
+      font-size: 1.1em;
+      padding: 8px;
+      margin-bottom: 16px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+    button {
+      font-size: 1em;
+      padding: 8px 16px;
+      border-radius: 4px;
+      border: none;
+      background: #1976d2;
+      color: #fff;
+      cursor: pointer;
+    }
+    .info {
+      margin-top: 16px;
+      color: #1976d2;
+    }
+    .theme-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    .prompt-row {
+      margin-bottom: 16px;
+    }
+    .history-row {
+      margin-bottom: 16px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>設定</h2>
+    <div class="theme-row">
+      <label for="theme" style="margin-bottom:0;">テーマ</label>
+      <select id="theme">
+        <option value="light">ライト</option>
+        <option value="dark">ダーク</option>
+      </select>
+    </div>
+    <div class="prompt-row">
+      <label for="systemPrompt">翻訳の特徴（システムプロンプト）</label>
+      <input type="text" id="systemPrompt" placeholder="例: 簡単な語彙で翻訳してください" style="width:100%; font-size:1.1em; padding:8px;">
+    </div>
+    <div class="history-row">
+      <button id="clearHistoryBtn" style="background:#b71c1c;">履歴をすべて削除</button>
+    </div>
+    <label for="apiType">翻訳API</label>
+    <select id="apiType">
+      <option value="openai">OpenAI (ChatGPT)</option>
+      <option value="deepl">DeepL</option>
+      <option value="gemini">Gemini</option>
+      <option value="claude">Claude</option>
+    </select>
+
+    <div id="apiKeyFields">
+      <div id="openaiField">
+        <label for="openaiKey">OpenAI APIキー</label>
+        <input type="password" id="openaiKey" placeholder="sk-...">
+      </div>
+      <div id="deeplField" style="display:none;">
+        <label for="deeplKey">DeepL APIキー</label>
+        <input type="password" id="deeplKey" placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx:fx">
+      </div>
+      <div id="geminiField" style="display:none;">
+        <label for="geminiKey">Gemini APIキー</label>
+        <input type="password" id="geminiKey" placeholder="APIキー">
+      </div>
+      <div id="claudeField" style="display:none;">
+        <label for="claudeKey">Claude APIキー</label>
+        <input type="password" id="claudeKey" placeholder="APIキー">
+      </div>
+    </div>
+
+    <button id="saveBtn">保存</button>
+    <div class="info" id="info"></div>
+    <div style="margin-top:24px;">
+      <a href="index.html">← メイン画面に戻る</a>
+    </div>
+  </div>
+  <script>
+    // 設定値をlocalStorageから読み込み
+    document.addEventListener('DOMContentLoaded', () => {
+      const apiType = localStorage.getItem('api_type') || 'openai';
+      const openaiKey = localStorage.getItem('openai_api_key') || '';
+      const deeplKey = localStorage.getItem('deepl_api_key') || '';
+      const geminiKey = localStorage.getItem('gemini_api_key') || '';
+      const claudeKey = localStorage.getItem('claude_api_key') || '';
+
+      document.getElementById('apiType').value = apiType;
+      document.getElementById('openaiKey').value = openaiKey;
+      document.getElementById('deeplKey').value = deeplKey;
+      document.getElementById('geminiKey').value = geminiKey;
+      document.getElementById('claudeKey').value = claudeKey;
+      // テーマ・システムプロンプトの初期値
+      const theme = localStorage.getItem('theme') || 'light';
+      const systemPrompt = localStorage.getItem('system_prompt') || '';
+      document.getElementById('theme').value = theme;
+      document.getElementById('systemPrompt').value = systemPrompt;
+
+      showApiKeyField(apiType);
+    });
+
+    // API種別で入力欄切り替え
+    document.getElementById('apiType').addEventListener('change', (e) => {
+      showApiKeyField(e.target.value);
+    });
+
+    function showApiKeyField(type) {
+      document.getElementById('openaiField').style.display = (type === 'openai') ? '' : 'none';
+      document.getElementById('deeplField').style.display = (type === 'deepl') ? '' : 'none';
+      document.getElementById('geminiField').style.display = (type === 'gemini') ? '' : 'none';
+      document.getElementById('claudeField').style.display = (type === 'claude') ? '' : 'none';
+    }
+
+    document.getElementById('saveBtn').addEventListener('click', () => {
+      const apiType = document.getElementById('apiType').value;
+      const openaiKey = document.getElementById('openaiKey').value.trim();
+      const deeplKey = document.getElementById('deeplKey').value.trim();
+      const geminiKey = document.getElementById('geminiKey').value.trim();
+      const claudeKey = document.getElementById('claudeKey').value.trim();
+      const theme = document.getElementById('theme').value;
+      const systemPrompt = document.getElementById('systemPrompt').value;
+      localStorage.setItem('api_type', apiType);
+      localStorage.setItem('openai_api_key', openaiKey);
+      localStorage.setItem('deepl_api_key', deeplKey);
+      localStorage.setItem('gemini_api_key', geminiKey);
+      localStorage.setItem('claude_api_key', claudeKey);
+      localStorage.setItem('theme', theme);
+      localStorage.setItem('system_prompt', systemPrompt);
+
+      document.getElementById('info').textContent = '設定を保存しました。';
+    });
+    // 履歴削除
+    document.getElementById('clearHistoryBtn').addEventListener('click', () => {
+      localStorage.removeItem('translation_history');
+      alert('履歴を削除しました');
+    });
+  </script>
+</body>
+</html>
